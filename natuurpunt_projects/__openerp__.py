@@ -30,7 +30,8 @@
     "depends" : ["project","document","organisation_structure"],
     "data" : [
         'natuurpunt_projects_view.xml',
-        'natuurpunt_projects_data.xml'
+        'natuurpunt_projects_data.xml',
+        'security/ir.model.access.csv', 
         ],
     "active": False,
     "installable": True

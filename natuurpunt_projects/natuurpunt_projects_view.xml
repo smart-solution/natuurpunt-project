@@ -160,8 +160,9 @@
 	    </field>
 			<field name="partner_id" position="after">
 			    <field name="main_contractor_id"/>
-		            <field name="seq" domain="[('code','=','project.project')]"/>
-		            <field name="code" readonly="1"/>
+                <field name="company_id" invisible="1"/>
+		        <field name="seq" domain="[('code','=','project.project'),('company_id','=',company_id)]"/>
+		        <field name="code" readonly="1"/>
 			</field>
 			<field name="date_start" position="replace"/>
 			<field name="date" position="replace"/>
@@ -400,6 +401,7 @@
 
     <record model="ir.actions.act_window" id="project.open_view_project_all">
         <field name="view_mode">tree,form,gantt,kanban</field>
+        <field name="view_id" ref="project.view_project"/>
 	<field name="context">{'search_default_Ontwerp':1, 'search_default_NietIngediend':1, 'search_default_Ingediend':1, 'search_default_GedeeltelijkGoedgekeurd':1, 'search_default_Goedgekeurd':1, 'search_default_Lopend': 1}</field>
     </record>
 

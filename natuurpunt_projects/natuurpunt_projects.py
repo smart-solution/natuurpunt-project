@@ -87,6 +87,7 @@ class project(osv.osv):
             ('closed', 'Beëindigd'),
             ('refused', 'Afgekeurd'),
             ], 'Status', readonly=True, track_visibility='onchange', select=True),
+        'company_id': fields.related('analytic_account_id', 'company_id', type="many2one", relation="res.company", string="Company", store=True),
     }
 
     _defaults = {
