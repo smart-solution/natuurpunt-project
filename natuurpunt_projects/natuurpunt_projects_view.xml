@@ -184,7 +184,7 @@
 				</group>
 			    </page>
 			    <page string="Taken" attrs="{'invisible': [('use_tasks','=',False)]}">
-			    	<field name="tasks" nolabel="1" context="{'default_project_id':active_id}">
+			    	<field name="tasks" nolabel="1" context="{'default_project_id':active_id,'hide_stages':True}">
 						<tree string="Taken" context="{'default_project_id':active_id}">
     	    	            <field name="project_id" invisible="True"/> 
     	    	        	<field name="name"/>
@@ -413,6 +413,9 @@
         <field name="arch" type="xml">
 			<field name="partner_id" position="attributes">
 				<attribute name="invisible">True</attribute>
+			</field>
+			<field name="stage_id" position="attributes">
+				<attribute name="invisible">context.get('hide_stages', True)</attribute>
 			</field>
 		</field>
     </record>
