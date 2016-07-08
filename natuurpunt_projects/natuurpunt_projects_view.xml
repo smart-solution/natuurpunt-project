@@ -415,7 +415,7 @@
 				<attribute name="invisible">True</attribute>
 			</field>
 			<field name="stage_id" position="attributes">
-				<attribute name="invisible">context.get('hide_stages', True)</attribute>
+				<attribute name="invisible">context.get('hide_stages', False)</attribute>
 			</field>
 		</field>
     </record>
