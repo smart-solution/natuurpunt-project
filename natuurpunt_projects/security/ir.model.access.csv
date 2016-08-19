@@ -1,5 +1,0 @@
-id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
-access_group_project_theme_general_manager,"Project Thema General Manager",model_project_theme_general,project.group_project_manager,1,1,1,1
-access_group_project_theme_detail_manager,"Project Thema Detail Manager",model_project_theme_detail,project.group_project_manager,1,1,1,1
-access_group_project_theme_general_user,"Project Thema General User",model_project_theme_general,project.group_project_user,1,0,0,0
-access_group_project_theme_detail_user,"Project Thema Detail User",model_project_theme_detail,project.group_project_user,1,0,0,0
