@@ -114,6 +114,11 @@
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="type">form</field>
         <field name="arch" type="xml">
+        	<xpath expr="//sheet/group/group/p" position="replace">
+            	<p colspan="2" attrs="{'invisible': [('analytic_account_id','=',False)]}" groups="project.group_project_manager">
+                	To invoice or setup invoicing and renewal options, go to the related contract: <field name="analytic_account_id" readonly="1" required="0" class="oe_inline"/>.
+                </p>
+            </xpath>
 	    <field name="state" position="attributes">
 		<attribute name="invisible">True</attribute>
 	    </field>
