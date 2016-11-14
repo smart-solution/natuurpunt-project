@@ -48,12 +48,12 @@ class project_theme_detail(osv.osv):
 project_theme_detail()
  
 class project(osv.osv):
+
     _inherit = 'project.project'
     
     _columns = {
         'full_name': fields.text('Volledige naam', required=True, translate=True),
         'ident_nbr': fields.char('Ident. nummer', size=64),
- #       'project_name': fields.char('Project naam', size=64),
         'seq': fields.many2one('ir.sequence', 'Volgnummer reeks', required=True, select=True ),
         'description': fields.text('Omschrijving'),
         'theme_general_ids': fields.many2many('project.theme.general', 'project_theme_general_rel', 'theme_general_id', 'project_id', 'Projects Themes General'),
@@ -88,6 +88,7 @@ class project(osv.osv):
             ('refused', 'Afgekeurd'),
             ], 'Status', readonly=True, track_visibility='onchange', select=True),
         'company_id': fields.related('analytic_account_id', 'company_id', type="many2one", relation="res.company", string="Company", store=True),
+        'project_code': fields.related('analytic_account_id', 'code', type="char", string="Project Code", store=True),
     }
 
     _defaults = {
@@ -117,7 +118,7 @@ class project(osv.osv):
         else:
             vals['seq'] = self.pool.get('ir.sequence').search(cr, uid, [('code', '=', 'project.project')])[0]
             vals['full_name'] = 'Volledige naam'
-        
+       
         return super(project, self).create(cr, uid, vals, context=context)
 
     def project_not_submitted(self, cr, uid, ids, context=None):
