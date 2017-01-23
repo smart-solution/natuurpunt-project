@@ -166,7 +166,7 @@ class project_task_reminder(osv.osv_memory):
 
         if user.email_work:
             try:
-                data_obj = self.pool.get('ir.model.data')           
+                data_obj = self.pool.get('ir.model.data')
                 template = data_obj.get_object(cr, uid, 'natuurpunt_projects', 'email_template_project_tasks_reminder')
             except ValueError:
                 raise osv.except_osv(_('Error!'),_("Cannot send email: no email template configured.\nYou can configure it under Settings/Technical/Email."))
@@ -176,11 +176,11 @@ class project_task_reminder(osv.osv_memory):
             context['body_html'] = msg_vals['body']
             context['body']      = msg_vals['body']
             context['res_id']    = False
-            
+
             self.pool.get('email.template').send_mail(cr, uid, template.id, False, force_send=True, context=context)
-        
+
         return True
- 
+    
     def generate_project_task_reminders(self, cr, uid, context=None):
         """Generates daily project task reminders"""
         if context == None:
@@ -194,17 +194,16 @@ class project_task_reminder(osv.osv_memory):
         users = user_obj.search(cr, uid, [])
 
         html_body_end = "<span><p><p/>"+_('Send from host %s - db %s')%(get_eth0(),cr.dbname)+"</span>"
-        link = "<b><a href='{}?db={}#view_type=list&model={}&menu_id={}'>{}</a></b>"
+        link = "<b><a href='{}?db={}#id={}&view_type=form&model={}&menu_id={}&action={}'>{}</a></b>"
         base_url = self.pool.get('ir.config_parameter').get_param(cr, SUPERUSER_ID, 'web.base.url')
-
         time_now = datetime.datetime.today().strftime('%Y-%m-%d')
         for user in user_obj.browse(cr, uid, users):
 
             task_items = []
             domain_filter = [('state', '!=', 'cancelled'),
                              ('state', '!=', 'done'),
-                             ('user_id','=',user.id), 
-                             ('date_deadline','=',time_now)]    
+                             ('user_id','=',user.id),
+                             ('date_deadline','=',time_now)]
 
             items = item_obj.search(cr, uid, domain_filter)
             for item in item_obj.browse(cr, uid, items):
@@ -213,7 +212,7 @@ class project_task_reminder(osv.osv_memory):
             context.update({'lang': user.lang})
 
             if task_items:
-                task_items_link = link.format(base_url,cr.dbname,'project.task',288,_('project tasks with deadline today'))
+                task_items_link = link.format(base_url,cr.dbname,task_items[0],'project.task',288,336,_('project tasks with deadline today'))
                 body = _("You have {0} {1}").format(len(task_items),task_items_link)
                 msg_vals = {
                     'subject': _("Deadline Project Task Reminder"),
@@ -225,5 +224,3 @@ class project_task_reminder(osv.osv_memory):
                 self.send_project_task_reminders_email(cr, uid, user, msg_vals, context=context)
 
         return True
-    
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
