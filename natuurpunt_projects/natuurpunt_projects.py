@@ -26,6 +26,8 @@ import datetime, re, random
 from openerp.tools.translate import _
 from openerp.osv import fields, osv
 import openerp.addons.decimal_precision as dp
+from natuurpunt_tools import get_eth0
+from openerp import SUPERUSER_ID
 
 class project_theme_general(osv.osv):
     _name = 'project.theme.general'
@@ -154,6 +156,71 @@ class project(osv.osv):
         return True
 
 project() 
-    
 
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+class project_task_reminder(osv.osv_memory):
+
+    _name = 'project.task.reminder'
+
+    def send_project_task_reminders_email(self, cr, uid, user, msg_vals, context=None):
+        """Send daily project task reminders via e-mail"""
+
+        if user.email_work:
+            try:
+                data_obj = self.pool.get('ir.model.data')
+                template = data_obj.get_object(cr, uid, 'natuurpunt_projects', 'email_template_project_tasks_reminder')
+            except ValueError:
+                raise osv.except_osv(_('Error!'),_("Cannot send email: no email template configured.\nYou can configure it under Settings/Technical/Email."))
+            assert template._name == 'email.template'
+            context['subject']   = msg_vals['subject']
+            context['email_to']  = user.email_work
+            context['body_html'] = msg_vals['body']
+            context['body']      = msg_vals['body']
+            context['res_id']    = False
+
+            self.pool.get('email.template').send_mail(cr, uid, template.id, False, force_send=True, context=context)
+
+        return True
+    
+    def generate_project_task_reminders(self, cr, uid, context=None):
+        """Generates daily project task reminders"""
+        if context == None:
+            context = {}
+
+        msg_obj = self.pool.get('mail.message')
+        item_obj = self.pool.get('project.task')
+        user_obj = self.pool.get('res.users')
+
+        # we need to check all users because invoice to complete is possible for everybody
+        users = user_obj.search(cr, uid, [])
+
+        html_body_end = "<span><p><p/>"+_('Send from host %s - db %s')%(get_eth0(),cr.dbname)+"</span>"
+        link = "<b><a href='{}?db={}#id={}&view_type=form&model={}&menu_id={}&action={}'>{}</a></b>"
+        base_url = self.pool.get('ir.config_parameter').get_param(cr, SUPERUSER_ID, 'web.base.url')
+        time_now = datetime.datetime.today().strftime('%Y-%m-%d')
+        for user in user_obj.browse(cr, uid, users):
+
+            task_items = []
+            domain_filter = [('state', '!=', 'cancelled'),
+                             ('state', '!=', 'done'),
+                             ('user_id','=',user.id),
+                             ('date_deadline','=',time_now)]
+
+            items = item_obj.search(cr, uid, domain_filter)
+            for item in item_obj.browse(cr, uid, items):
+                task_items.append(item.id)
+
+            context.update({'lang': user.lang})
+
+            if task_items:
+                task_items_link = link.format(base_url,cr.dbname,task_items[0],'project.task',288,336,_('project tasks with deadline today'))
+                body = _("You have {0} {1}").format(len(task_items),task_items_link)
+                msg_vals = {
+                    'subject': _("Deadline Project Task Reminder"),
+                    'body': body + html_body_end,
+                    'type': 'notification',
+                    'notified_partner_ids': [(6,0,[user.partner_id.id])],
+                }
+                msg_obj.create(cr, uid, msg_vals)
+                self.send_project_task_reminders_email(cr, uid, user, msg_vals, context=context)
+
+        return True
