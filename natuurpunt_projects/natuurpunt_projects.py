@@ -60,7 +60,7 @@ class project(osv.osv):
         'description': fields.text('Omschrijving'),
         'theme_general_ids': fields.many2many('project.theme.general', 'project_theme_general_rel', 'project_id', 'theme_general_id', 'Projects Themes General'),
         'theme_detail_ids': fields.many2many('project.theme.detail', 'project_theme_detail_rel', 'project_id', 'theme_detail_id', 'Project Themes Detail'),
-        'contact_id': fields.many2one('res.partner', 'Contactpersoon', select=True),
+        'contact_id': fields.many2one('res.users', 'Contactpersoon', select=True),
         'main_contractor_id': fields.many2one('res.partner', 'Hoofdopdrachtgever', select=True),
         'co_contractor_ids': fields.many2many('res.partner', 'project_co_contractor_rel', 'project_id', 'partner_id', 'Co Contractors'),
         'sub_contractor_ids': fields.many2many('res.partner', 'project_sub_contractor_rel', 'project_id', 'partner_id', 'Sub Contractors'),
@@ -91,12 +91,14 @@ class project(osv.osv):
             ], 'Status', readonly=True, track_visibility='onchange', select=True),
         'company_id': fields.related('analytic_account_id', 'company_id', type="many2one", relation="res.company", string="Company", store=True),
         'project_code': fields.related('analytic_account_id', 'code', type="char", string="Project Code", store=True),
-    }
+        'eindrapp': fields.boolean('Meenemen in eindrapportering', required=False),
+        'ref_eindrapport': fields.text('Referenties eindrapporten'),
+        }
 
     _defaults = {
         'project_state': 'draft',
-    }
-
+    }   
+    
     def onchange_partner_id(self, cr, uid, ids, partner_id):
         res = super(project, self).onchange_partner_id(cr, uid, ids, partner_id)
     	res['value']['main_contractor_id'] = partner_id
@@ -181,6 +183,7 @@ class project_task_reminder(osv.osv_memory):
 
         return True
     
+    
     def generate_project_task_reminders(self, cr, uid, context=None):
         """Generates daily project task reminders"""
         if context == None:
@@ -224,3 +227,4 @@ class project_task_reminder(osv.osv_memory):
                 self.send_project_task_reminders_email(cr, uid, user, msg_vals, context=context)
 
         return True
+    

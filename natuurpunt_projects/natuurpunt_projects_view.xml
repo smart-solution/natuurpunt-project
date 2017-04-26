@@ -185,7 +185,9 @@
 				<group colspan="4" col="2">	
 		        	    <field name="ident_nbr"/>
 		        	    <field name="full_name"/>
-				    <field name="description"/>
+				    	<field name="description"/>
+				    	<field name="eindrapp"/>
+				    	<field name="ref_eindrapport"/>
 				</group>
 			    </page>
 			    <page string="Taken" attrs="{'invisible': [('use_tasks','=',False)]}">
@@ -451,19 +453,53 @@
 			</field>
 		</field>
     </record>
-
+    
     <record model="ir.ui.view" id="view_natuurpunt_project_search_form">
         <field name="name">view.natuurpunt.project.search.form</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.view_project_project_filter"/>
         <field name="type">form</field>
         <field name="arch" type="xml">
-			<filter string="Contact" position="replace">
-				<filter string="Opdrachtgever" name="Partner" icon="terp-partner" domain="[]" context="{'group_by':'partner_id'}"/>
-				<filter string="Contactpersoon" name="Partner" icon="terp-partner" domain="[]" context="{'group_by':'contact_id'}"/>
-			</filter>
-		</field>
+                       <filter string="Contact" position="replace">
+                               <filter string="Opdrachtgever" name="Partner" icon="terp-partner" domain="[]" context="{'group_by':'partner_id'}"/>
+                               <filter string="Contactpersoon" name="Partner" icon="terp-partner" domain="[]" context="{'group_by':'contact_id'}"/>
+                       </filter>
+        </field>
     </record>
+    
+    <record id="view_my_natuurpunt_project_tree" model="ir.actions.act_window">
+           <field name="name">My Projects Menu</field>
+           <field name="type">ir.actions.act_window</field>
+           <field name="res_model">project.project</field>
+           <field name="view_type">form</field>
+           <field name="view_mode">tree,form</field>
+           <field name="domain">[('contact_id','=',uid)]</field>
+           <field name="view_id" ref="view_natuurpunt_project_tree"/>
+    </record>
+             
+    <menuitem id="menu_my_natuurpunt_project_tree"
+              name="My Projects"
+              parent="project.menu_project_management"
+              sequence="10"
+              action="view_my_natuurpunt_project_tree"
+              groups="project.group_project_user,project.group_project_manager"/>
+    
+    <record id="view_my_natuurpunt_task_tree" model="ir.actions.act_window">
+           <field name="name">My Tasks</field>
+           <field name="type">ir.actions.act_window</field>
+           <field name="res_model">project.task</field>
+           <field name="view_type">form</field>
+           <field name="view_mode">tree,form</field>
+           <field name="domain">[('user_id','=',uid)]</field>
+           <field name="view_id" ref="view_natuurpunt_task_tree"/>
+    </record>
+             
+    <menuitem id="menu_my_natuurpunt_task_tree"
+              name="My Tasks Menu"
+              parent="project.menu_project_management"
+              sequence="11"
+              action="view_my_natuurpunt_task_tree"
+              groups="project.group_project_user,project.group_project_manager"/>
 
     </data>
 </openerp>
