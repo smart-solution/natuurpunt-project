@@ -485,7 +485,7 @@
               groups="project.group_project_user,project.group_project_manager"/>
     
     <record id="view_my_natuurpunt_task_tree" model="ir.actions.act_window">
-           <field name="name">My Tasks</field>
+           <field name="name">My Tasks Menu</field>
            <field name="type">ir.actions.act_window</field>
            <field name="res_model">project.task</field>
            <field name="view_type">form</field>
@@ -495,11 +495,23 @@
     </record>
              
     <menuitem id="menu_my_natuurpunt_task_tree"
-              name="My Tasks Menu"
+              name="My Tasks"
               parent="project.menu_project_management"
               sequence="11"
               action="view_my_natuurpunt_task_tree"
               groups="project.group_project_user,project.group_project_manager"/>
 
+	<menuitem action="project.open_view_project_all" 
+			  id="project.menu_projects" 
+			  parent="project.menu_project_management" 
+			  sequence="1"
+			  groups="project.group_project_manager"/>
+			  
+	<menuitem action="project.action_view_task" 
+			  id="project.menu_action_view_task" 
+			  parent="project.menu_project_management" 
+			  sequence="5"
+			  groups="project.group_project_manager"/>
+	    
     </data>
 </openerp>
