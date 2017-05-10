@@ -18,3 +18,12 @@ msgstr ""
 msgid "Category"
 msgstr "Categorie"
 
+#. module: natuurpunt_projects
+#: model:ir.ui.menu,name:natuurpunt_projects.menu_my_natuurpunt_project_tree
+msgid "My Projects"
+msgstr "Mijn projecten"
+
+#. module: natuurpunt_projects
+#: model:ir.ui.menu,name:natuurpunt_projects.menu_my_natuurpunt_task_tree
+msgid "My Tasks"
+msgstr "Mijn taken"
