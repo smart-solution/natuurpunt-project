@@ -193,11 +193,11 @@ class project_task_reminder(osv.osv_memory):
         item_obj = self.pool.get('project.task')
         user_obj = self.pool.get('res.users')
 
-        # we need to check all users because invoice to complete is possible for everybody
+        # we need to check all users
         users = user_obj.search(cr, uid, [])
 
         html_body_end = "<span><p><p/>"+_('Send from host %s - db %s')%(get_eth0(),cr.dbname)+"</span>"
-        link = "<b><a href='{}?db={}#id={}&view_type=form&model={}&menu_id={}&action={}'>{}</a></b>"
+        link = "<b><a href='{}?db={}#id={}&view_type=form&model={}&menu_id={}&action={}'>{}</a></b><br>"
         base_url = self.pool.get('ir.config_parameter').get_param(cr, SUPERUSER_ID, 'web.base.url')
         time_now = datetime.datetime.today().strftime('%Y-%m-%d')
         for user in user_obj.browse(cr, uid, users):
@@ -210,13 +210,15 @@ class project_task_reminder(osv.osv_memory):
 
             items = item_obj.search(cr, uid, domain_filter)
             for item in item_obj.browse(cr, uid, items):
-                task_items.append(item.id)
+                task_items.append([item.id,item.name])
 
             context.update({'lang': user.lang})
 
             if task_items:
-                task_items_link = link.format(base_url,cr.dbname,task_items[0],'project.task',288,336,_('project tasks with deadline today'))
-                body = _("You have {0} {1}").format(len(task_items),task_items_link)
+                task_items_links = ""
+                for item in task_items:                 
+                    task_items_links += link.format(base_url,cr.dbname,item[0],'project.task',288,336,item[1])
+                body = _("You have {0} {1} {2}").format(len(task_items),_('project tasks with deadline today:<br>'),task_items_links)
                 msg_vals = {
                     'subject': _("Deadline Project Task Reminder"),
                     'body': body + html_body_end,
