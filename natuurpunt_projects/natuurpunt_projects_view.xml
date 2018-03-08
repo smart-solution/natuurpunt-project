@@ -256,12 +256,16 @@
 		        		<field name="vat" on_change="onchange_vat(appr_amount_excl, vat)"/>
 		        		<field name="appr_amount_incl" attrs="{'invisible': [('vat','=',False)]}"/>
 		        		<field name="date_approved"/>
+         				<field name="prijsherziening"/>
+						<field name="prijsherziening_comment" nolabel="1"/>
 					</group>
 					<group>
 		        		<field name="caution"/>
 		        		<field name="caution_amt"/>
 		        		<field name="overhead_pct"/>
 		        		<field name="subs_pct"/>
+						<field name="max_subs_amt" on_change="onchange_max_subs_amt()"/>
+						<field name="max_subs_amt_override" invisible="1"/>
 					</group>
 					</group>
 			    </page>

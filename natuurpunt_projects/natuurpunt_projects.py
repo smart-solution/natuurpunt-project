@@ -51,6 +51,23 @@ project_theme_detail()
  
 class project(osv.osv):
 
+    def _get_max_subs_amt(self, cr, uid, ids, name, args=None, context=None):
+        result = dict.fromkeys(ids, False)
+        for line in self.browse(cr, uid, ids, context=context):
+            if not 'max_subs_amt' in context:
+                result[line.id]=line.appr_amount_excl + (line.appr_amount_excl * line.subs_pct / 100)
+            else:
+                result[line.id]=context['max_subs_amt']
+        return result
+
+    def _set_max_subs_amt(self, cr, uid, id, name, value, args=None, context=None):
+        return True
+
+    def onchange_max_subs_amt(self, cr, uid, ids):
+        res = {}
+        res['max_subs_amt_override'] = True
+        return {'value':res}
+
     _inherit = 'project.project'
     
     _columns = {
@@ -74,6 +91,13 @@ class project(osv.osv):
         'vat': fields.boolean('BTW'),
         'overhead_pct': fields.float('Overhead PCT', digits=(16,2)),                            
         'subs_pct': fields.float('Subsidie PCT', digits=(16,2)),
+        'max_subs_amt': fields.function(
+                string='Maximum subsidiebedrag',
+                fnct=_get_max_subs_amt,
+                fnct_inv=_set_max_subs_amt,
+                type='float',
+                store=True,),
+        'max_subs_amt_override': fields.boolean('max_subs_amt_override'),
         'reserv_ids': fields.many2many('res.partner', 'project_reserv_rel', 'project_id', 'partner_id', 'Project Reservaten'),
         'user_agreement': fields.boolean('Gebruiksovereenkomst'),
         'partner_agreement': fields.boolean('Partnerovereenkomst'),
@@ -93,15 +117,17 @@ class project(osv.osv):
         'project_code': fields.related('analytic_account_id', 'code', type="char", string="Project Code", store=True),
         'eindrapp': fields.boolean('Meenemen in eindrapportering', required=False),
         'ref_eindrapport': fields.text('Referenties eindrapporten'),
+        'prijsherziening': fields.boolean('Prijsherziening'),
+        'prijsherziening_comment': fields.text('Opmerking'),
         }
 
     _defaults = {
         'project_state': 'draft',
-    }   
-    
+    }
+
     def onchange_partner_id(self, cr, uid, ids, partner_id):
         res = super(project, self).onchange_partner_id(cr, uid, ids, partner_id)
-    	res['value']['main_contractor_id'] = partner_id
+        res['value']['main_contractor_id'] = partner_id
         return res
 
     def onchange_vat(self, cr, uid, ids, amount_excl, vat):
@@ -110,19 +136,27 @@ class project(osv.osv):
         amount = 0.00
         if vat:
             amount = round((amount_excl * 1.21), 2)
-    	res['value']['appr_amount_incl'] = amount
+        res['value']['appr_amount_incl'] = amount
         return res
 
+    def write(self, cr, uid, ids, vals, context=None):
+        if 'max_subs_amt_override' not in vals:
+            vals['max_subs_amt_override'] = False
+        else:
+            context['max_subs_amt'] = vals['max_subs_amt']
+        return super(project, self).write(cr, uid, ids, vals, context=context)
+
     def create(self, cr, uid, vals, context=None):
-        print 'VALS:',vals
-        
+        if 'max_subs_amt_override' not in vals:
+            vals['max_subs_amt_override'] = False
+        else:
+            context['max_subs_amt'] = vals['max_subs_amt']
         if not 'analytic_account_id' in vals:
             seq_id = self.pool.get('ir.sequence').search(cr, uid, [('id','=', vals['seq'])])
             vals['code'] = self.pool.get('ir.sequence').next_by_id(cr, uid, seq_id, context)
         else:
             vals['seq'] = self.pool.get('ir.sequence').search(cr, uid, [('code', '=', 'project.project')])[0]
             vals['full_name'] = 'Volledige naam'
-       
         return super(project, self).create(cr, uid, vals, context=context)
 
     def project_not_submitted(self, cr, uid, ids, context=None):
@@ -157,7 +191,7 @@ class project(osv.osv):
         self.write(cr, uid, ids, {'project_state': 'refused'}, context=context)
         return True
 
-project() 
+project()
 
 class project_task_reminder(osv.osv_memory):
 
