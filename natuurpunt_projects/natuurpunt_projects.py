@@ -55,7 +55,11 @@ class project(osv.osv):
         result = dict.fromkeys(ids, False)
         for line in self.browse(cr, uid, ids, context=context):
             if not 'max_subs_amt' in context:
-                result[line.id]=line.appr_amount_excl + (line.appr_amount_excl * line.subs_pct / 100)
+                # if max_subs_amt has already been overriden, don't calculate
+                if not line.max_subs_amt_override:
+                    result[line.id]= line.appr_amount_excl * line.subs_pct / 100
+                else:
+                    result[line.id] = line.max_subs_amt
             else:
                 result[line.id]=context['max_subs_amt']
         return result
@@ -140,8 +144,14 @@ class project(osv.osv):
         return res
 
     def write(self, cr, uid, ids, vals, context=None):
+        # check if we want to override a calculated max_subs_amt value
         if 'max_subs_amt_override' not in vals:
-            vals['max_subs_amt_override'] = False
+            # check if we want to override an already overriden max_subs_amt value
+            if 'max_subs_amt' in vals:
+                context['max_subs_amt'] = vals['max_subs_amt']
+            # recalculate overriden value if subs_pct changed
+            elif 'subs_pct' in vals:
+                vals['max_subs_amt_override'] = False
         else:
             context['max_subs_amt'] = vals['max_subs_amt']
         return super(project, self).write(cr, uid, ids, vals, context=context)
