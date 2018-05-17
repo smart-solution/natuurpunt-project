@@ -160,7 +160,8 @@ class project(osv.osv):
         if 'max_subs_amt_override' not in vals:
             vals['max_subs_amt_override'] = False
         else:
-            context['max_subs_amt'] = vals['max_subs_amt']
+            if vals['max_subs_amt_override'] == True:
+                context['max_subs_amt'] = vals['max_subs_amt']
         if not 'analytic_account_id' in vals:
             seq_id = self.pool.get('ir.sequence').search(cr, uid, [('id','=', vals['seq'])])
             vals['code'] = self.pool.get('ir.sequence').next_by_id(cr, uid, seq_id, context)
